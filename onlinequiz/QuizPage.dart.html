@@ -1,0 +1,122 @@
+<html>
+<head>
+<title>QuizPage.dart</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #000000;}
+.s1 { color: #008000; font-weight: bold;}
+.s2 { color: #000080; font-weight: bold;}
+.s3 { color: #0000ff;}
+.s4 { color: #808080; font-style: italic;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+QuizPage.dart</font>
+</center></td></tr></table>
+<pre>import <span class="s1">'package:cetquiz_app/Screens/ResultPage.dart'</span>;
+import <span class="s1">'package:cetquiz_app/Service/Question.dart'</span>;
+import <span class="s1">'package:cetquiz_app/Service/QuizManager.dart'</span>;
+import <span class="s1">'package:flutter/material.dart'</span>;
+
+<span class="s2">class </span>QuizPage <span class="s2">extends </span>StatefulWidget {
+  @override
+  _QuizPageState createState() =&gt; _QuizPageState();
+}
+
+<span class="s2">class </span>_QuizPageState <span class="s2">extends </span>State&lt;QuizPage&gt; {
+  QuizManager _manager = QuizManager();
+  Future&lt;<span class="s2">void</span>&gt; quizloader;
+  List&lt;Widget&gt; getOptions(Question question) {
+    List&lt;Widget&gt; optionButtons = [];
+    <span class="s2">for </span>(int i = <span class="s3">0</span>; i &lt; question.options.length; i++) {
+      optionButtons.add(FlatButton(
+        onPressed: () {
+          _manager.nextQuestion(_manager.getCurrentQuestion().options[i].score);
+          <span class="s2">if </span>(_manager.isFinished()) {
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) =&gt; ResultPage(
+                      score: _manager.getTotalScore(),
+                    )));
+          }
+          setState(() {});
+        },
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(<span class="s3">10</span>),
+          decoration: BoxDecoration(
+            color: Colors.green,
+            borderRadius: BorderRadius.circular(<span class="s3">10</span>),
+          ),
+          child: Text(
+            <span class="s1">'</span>${_manager.getCurrentQuestion().options[i].text}<span class="s1">'</span>,
+            style: TextStyle(
+              fontSize: <span class="s3">25</span>,
+            ),
+          ),
+        ),
+      ));
+    }
+    <span class="s2">return </span>optionButtons;
+  }
+
+  @override
+  <span class="s2">void </span>initState() {
+    <span class="s4">// TODO: implement initState</span>
+    <span class="s2">super</span>.initState();
+    quizloader = _manager.LoadQuestions(<span class="s3">10</span>);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    <span class="s2">return </span>Scaffold(
+        appBar: AppBar(
+          title: Text(
+              <span class="s1">'Questions </span>${_manager.getCurrentId()}<span class="s1">/</span>${_manager.totalQuestionNumber()}<span class="s1">'</span>),
+        ),
+        body: FutureBuilder&lt;<span class="s2">void</span>&gt;(
+            future: quizloader,
+            builder: (BuildContext context, AsyncSnapshot&lt;<span class="s2">void</span>&gt; snapshot) {
+              <span class="s2">if </span>(snapshot.connectionState == ConnectionState.done) {
+                <span class="s2">return </span>Container(
+                  padding: EdgeInsets.all(<span class="s3">10</span>),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        flex: <span class="s3">2</span>,
+                        child: Container(
+                          height: <span class="s3">30</span>,
+                          padding: EdgeInsets.symmetric(vertical: <span class="s3">30</span>),
+                          child: Text(
+                            <span class="s1">'</span>${_manager.getCurrentQuestion().text}<span class="s1">'</span>,
+                            style: TextStyle(
+                              fontSize: <span class="s3">15</span>,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: <span class="s3">8</span>,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: <span class="s3">20</span>),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: getOptions(_manager.getCurrentQuestion()),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              } <span class="s2">else </span>{
+                <span class="s2">return </span>Center(child: CircularProgressIndicator());
+              }
+            }));
+  }
+}
+</pre>
+</body>
+</html>
